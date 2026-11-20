@@ -14,7 +14,8 @@ public class AntigravityProvider : IQuotaProvider
     internal const string DisableUpdaterVariable = "AGY_CLI_DISABLE_AUTO_UPDATE";
 
     internal static readonly IReadOnlyDictionary<string, string> ChildEnvironment =
-        new Dictionary<string, string> { [DisableUpdaterVariable] = "1" };
+        // agy only honours the literal "true" (checked with agy 1.5.13: "1" is ignored).
+        new Dictionary<string, string> { [DisableUpdaterVariable] = "true" };
 
     public async Task<QuotaSnapshot> ReadAsync(ProviderConfig cfg, DateTimeOffset now, CancellationToken ct)
     {
@@ -93,7 +94,7 @@ public class AntigravityProvider : IQuotaProvider
             string tmpPath = Path.Combine(exchangeDir, $"{cfg.Id}-usage.tmp");
             string txtPath = Path.Combine(exchangeDir, $"{cfg.Id}-usage.txt");
 
-            string cmdContent = $"@echo off\r\nset {DisableUpdaterVariable}=1\r\n\"{agyPath}\" -p /usage > \"{tmpPath}\" 2>&1\r\nmove /y \"{tmpPath}\" \"{txtPath}\" >nul\r\n";
+            string cmdContent = $"@echo off\r\nset {DisableUpdaterVariable}=true\r\n\"{agyPath}\" -p /usage > \"{tmpPath}\" 2>&1\r\nmove /y \"{tmpPath}\" \"{txtPath}\" >nul\r\n";
 
             Encoding oemEncoding = Encoding.ASCII;
             try
