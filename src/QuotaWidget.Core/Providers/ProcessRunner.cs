@@ -14,7 +14,8 @@ public static class ProcessRunner
         IEnumerable<string>? args = null,
         string? workingDirectory = null,
         TimeSpan? timeout = null,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default,
+        IReadOnlyDictionary<string, string>? environment = null)
     {
         var psi = new ProcessStartInfo
         {
@@ -32,6 +33,12 @@ public static class ProcessRunner
         {
             foreach (var a in args)
                 psi.ArgumentList.Add(a);
+        }
+
+        if (environment != null)
+        {
+            foreach (var kv in environment)
+                psi.Environment[kv.Key] = kv.Value;
         }
 
         using var process = new Process { StartInfo = psi };

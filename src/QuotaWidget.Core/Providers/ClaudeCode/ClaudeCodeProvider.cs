@@ -26,7 +26,9 @@ public class ClaudeCodeProvider : IQuotaProvider
                 CliArgs,
                 workingDirectory: Path.GetTempPath(),
                 timeout: timeout,
-                cancellationToken: ct);
+                cancellationToken: ct,
+                // A quota read must not start the CLI's own updater (it may open a console window).
+                environment: new Dictionary<string, string> { ["DISABLE_AUTOUPDATER"] = "1" });
 
             if (!result.Success && string.IsNullOrEmpty(result.Stdout))
             {

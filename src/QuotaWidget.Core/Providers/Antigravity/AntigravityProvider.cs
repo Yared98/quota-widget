@@ -9,6 +9,13 @@ namespace QuotaWidget.Providers.Antigravity;
 
 public class AntigravityProvider : IQuotaProvider
 {
+    // agy starts a detached background updater that runs `agy --version` in a new, visible console
+    // (a Windows Terminal window flashes). Quota reads never need it; the user's own agy still updates.
+    internal const string DisableUpdaterVariable = "AGY_CLI_DISABLE_AUTO_UPDATE";
+
+    internal static readonly IReadOnlyDictionary<string, string> ChildEnvironment =
+        new Dictionary<string, string> { [DisableUpdaterVariable] = "1" };
+
     public async Task<QuotaSnapshot> ReadAsync(ProviderConfig cfg, DateTimeOffset now, CancellationToken ct)
     {
         string command = cfg.Command ?? "agy";
@@ -32,7 +39,8 @@ public class AntigravityProvider : IQuotaProvider
                 agyPath,
                 new[] { "-p", "/usage" },
                 timeout: timeout,
-                cancellationToken: ct);
+                cancellationToken: ct,
+                environment: ChildEnvironment);
 
             if (!result.Success && string.IsNullOrEmpty(result.Stdout))
             {
@@ -85,7 +93,7 @@ public class AntigravityProvider : IQuotaProvider
             string tmpPath = Path.Combine(exchangeDir, $"{cfg.Id}-usage.tmp");
             string txtPath = Path.Combine(exchangeDir, $"{cfg.Id}-usage.txt");
 
-            string cmdContent = $"@echo off\r\n\"{agyPath}\" -p /usage > \"{tmpPath}\" 2>&1\r\nmove /y \"{tmpPath}\" \"{txtPath}\" >nul\r\n";
+            string cmdContent = $"@echo off\r\nset {DisableUpdaterVariable}=1\r\n\"{agyPath}\" -p /usage > \"{tmpPath}\" 2>&1\r\nmove /y \"{tmpPath}\" \"{txtPath}\" >nul\r\n";
 
             Encoding oemEncoding = Encoding.ASCII;
             try
