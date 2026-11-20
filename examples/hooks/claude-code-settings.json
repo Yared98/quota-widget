@@ -1,0 +1,10 @@
+{
+  "hooks": {
+    "Stop": [
+      { "hooks": [ { "type": "command", "command": "qw refresh claude" } ] }
+    ],
+    "SubagentStop": [
+      { "hooks": [ { "type": "command", "command": "qw refresh claude" } ] }
+    ]
+  }
+}

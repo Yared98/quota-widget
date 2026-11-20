@@ -1,0 +1,41 @@
+{
+  "refreshMinutes": 10,
+  "language": "auto",
+  "offsetX": 8,
+  // "exportPath": "%LOCALAPPDATA%\\QuotaWidget\\quotas.json",
+  "providers": [
+    {
+      "id": "claude",
+      "type": "claude-code",
+      "label": "Claude",
+      "enabled": true
+      // "workers": ["claude-haiku-*", "claude-sonnet-*"],
+      // "minRefreshSeconds": 120
+    },
+    {
+      "id": "gemini",
+      "type": "antigravity",
+      "label": "Gemini",
+      "enabled": false
+      // "workers": ["agy:gemini-*", "agy:claude-*"],
+      // "workerFamilies": { "agy:claude-*": "Claude and GPT models" },
+      // "minRefreshSeconds": 30
+    },
+    {
+      "id": "opencode",
+      "type": "opencode",
+      "label": "OC",
+      "enabled": false,
+      // Subscription models report cost 0: limit them by "requests" (or "tokens"); pay-per-use ones by "usd".
+      "budgets": [ { "name": "Go", "models": ["opencode-go/*"], "requests": 20000 } ]
+    },
+    {
+      "id": "custom",
+      "type": "command",
+      "label": "Mine",
+      "enabled": false,
+      "command": "powershell",
+      "args": ["-NoProfile", "-File", "examples/providers/sample.ps1"]
+    }
+  ]
+}

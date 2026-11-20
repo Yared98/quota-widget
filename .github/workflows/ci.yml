@@ -1,0 +1,50 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+    tags: [ 'v*' ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build-and-test:
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '8.0.x'
+
+    - name: Restore dependencies
+      run: dotnet restore QuotaWidget.sln
+
+    - name: Build solution
+      run: dotnet build QuotaWidget.sln -c Release --no-restore
+
+    - name: Run tests
+      run: dotnet test QuotaWidget.sln -c Release --no-build --verbosity normal
+
+    - name: Publish app and CLI
+      if: startsWith(github.ref, 'refs/tags/v')
+      run: |
+        dotnet publish src/QuotaWidget/QuotaWidget.csproj -c Release -r win-x64 --self-contained false -o publish
+        dotnet publish src/QuotaWidget.Cli/QuotaWidget.Cli.csproj -c Release -r win-x64 --self-contained false -o publish
+
+    - name: Package zip
+      if: startsWith(github.ref, 'refs/tags/v')
+      shell: pwsh
+      run: |
+        Compress-Archive -Path publish/* -DestinationPath QuotaWidget-win-x64.zip
+
+    - name: Create Release
+      if: startsWith(github.ref, 'refs/tags/v')
+      uses: softprops/action-gh-release@v2
+      with:
+        files: QuotaWidget-win-x64.zip
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
